@@ -1,0 +1,46 @@
+plugins {
+    id 'org.springframework.boot' version '2.3.7.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+}
+
+group = 'com.mydata'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // spring
+    implementation ('org.springframework.boot:spring-boot-starter-web')
+
+    // aws
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.1000')
+    implementation ('com.amazonaws:aws-java-sdk-codecommit')
+
+    // lombok
+    compileOnly ('org.projectlombok:lombok')
+    annotationProcessor ('org.projectlombok:lombok')
+
+    // dev
+    developmentOnly ('org.springframework.boot:spring-boot-devtools')
+    runtimeOnly ('com.h2database:h2')
+
+    // conf
+    annotationProcessor ('org.springframework.boot:spring-boot-configuration-processor')
+
+    // test
+    testImplementation ('org.springframework.boot:spring-boot-starter-test')
+}
+
+test {
+    useJUnitPlatform()
+}
