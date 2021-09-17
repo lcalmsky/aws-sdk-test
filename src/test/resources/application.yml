@@ -1,16 +1,7 @@
-aws:
-  code-commit:
-    token: abcd
-
 test:
   code-commit:
-    repository-name: abcd
-    pull-request:
-      title: abcd
-      description: abcd
-      source-reference: abcd
-      destination-reference: abcd
+    repository-name: <REPOSITORY_NAME>
+    file-path: <FILE_PATH>
     commit:
-      branch-name: abcd
-      commit-messsage: acbd
-      file-path: abcd
+      branch-name: <BRANCH_NAME>
+      commit-message: <COMMIT_MESSAGE>

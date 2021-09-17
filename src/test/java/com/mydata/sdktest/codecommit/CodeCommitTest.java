@@ -4,56 +4,50 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.codecommit.AWSCodeCommit;
 import com.amazonaws.services.codecommit.AWSCodeCommitClient;
 import com.amazonaws.services.codecommit.model.*;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 
 @SpringBootTest
 public class CodeCommitTest {
-    private AWSCodeCommit codeCommit;
+    private static AWSCodeCommit codeCommit;
 
-    @Value("${aws.code-commit.token")
-    private String token;
-
-    @Value("${test.code-commit.repository-name")
+    @Value("${test.code-commit.repository-name}")
     private String repositoryName;
-
-    @Value("${test.code-commit.commit.commit-message")
-    private String commitMessage;
-    @Value("${test.code-commit.commit.branch-name")
-    private String branchName;
-    @Value("${test.code-commit.commit.file-path")
+    @Value("${test.code-commit.file-path}")
     private String filePath;
+    @Value("${test.code-commit.commit.commit-message}")
+    private String commitMessage;
+    @Value("${test.code-commit.commit.branch-name}")
+    private String branchName;
 
-    @Value("${test.code-commit.pull-request.title")
-    private String title;
-    @Value("${test.code-commit.pull-request.description")
-    private String description;
-    @Value("${test.code-commit.pull-request.source-reference")
-    private String sourceReference;
-    @Value("${test.code-commit.pull-request.destination-reference")
-    private String destinationReference;
+    private static String commitId;
 
-    @BeforeEach
-    void beforeEach() {
+    @BeforeAll
+    static void beforeEach() {
         // given
-        codeCommit = codeCommit == null ?
-                AWSCodeCommitClient.builder()
-                        .withRegion(Regions.AP_NORTHEAST_2.getName())
-                        .build() :
-                codeCommit;
+        codeCommit = AWSCodeCommitClient.builder()
+                .withRegion(Regions.AP_NORTHEAST_2.getName())
+                .build();
     }
 
     @Test
-    @DisplayName("Token으로 Repository 리스트 조회")
+    @DisplayName("Repository 리스트 조회")
     void listRepositoriesTest() {
         // when
-        ListRepositoriesResult listRepositoriesResult = codeCommit.listRepositories(new ListRepositoriesRequest()
-                .withNextToken(token));
+        ListRepositoriesResult listRepositoriesResult = codeCommit.listRepositories(new ListRepositoriesRequest());
         // then
         List<RepositoryNameIdPair> repositories = listRepositoriesResult.getRepositories();
         repositories.forEach(System.out::println);
@@ -70,33 +64,48 @@ public class CodeCommitTest {
     }
 
     @Test
-    @DisplayName("Commit")
-    void commitTest() {
+    @DisplayName("파일 다운로드 -> 수정 -> 파일 업로드 테스트")
+    void fileIntegrationTest() {
+        Assertions.assertAll(
+                this::getFile,
+                this::modifyFile,
+                this::putFile
+        );
+    }
+
+    void getFile() throws IOException {
         // when
-        CreateCommitResult commitResult = codeCommit.createCommit(new CreateCommitRequest()
+        GetFileResult fileResult = codeCommit.getFile(new GetFileRequest()
+                .withRepositoryName(repositoryName)
+                .withFilePath(filePath));
+        // then
+        Path path = Paths.get(filePath);
+        Path parent = path.getParent();
+        if (!Files.exists(parent)) {
+            Files.createDirectories(parent);
+        }
+        Files.write(path, StandardCharsets.UTF_8.decode(fileResult.getFileContent()).toString()
+                .getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
+        commitId = fileResult.getCommitId();
+    }
+
+    private void modifyFile() throws IOException {
+        List<String> allLines = Files.readAllLines(Paths.get(filePath));
+        allLines.add("# this is test " + System.currentTimeMillis());
+        Files.write(Paths.get(filePath), allLines);
+    }
+
+    void putFile() throws IOException {
+        // when
+        PutFileResult putFileResult = codeCommit.putFile(new PutFileRequest()
                 .withRepositoryName(repositoryName)
                 .withBranchName(branchName)
                 .withCommitMessage(commitMessage)
-                .withPutFiles(new PutFileEntry()
-                        .withFilePath(filePath))
+                .withParentCommitId(commitId)
+                .withFilePath(filePath)
+                .withFileContent(ByteBuffer.wrap(Files.readAllBytes(Paths.get(filePath))))
         );
         // then
-        System.out.println(commitResult);
-    }
-
-    @Test
-    @DisplayName("PR 생성")
-    void createPullRequestTest() {
-        // when
-        CreatePullRequestResult pullRequestResult = codeCommit.createPullRequest(new CreatePullRequestRequest()
-                .withTitle(title)
-                .withClientRequestToken(token)
-                .withDescription(description)
-                .withTargets(new Target()
-                        .withRepositoryName(repositoryName)
-                        .withSourceReference(sourceReference)
-                        .withDestinationReference(destinationReference)));
-        // then
-        System.out.println(pullRequestResult);
+        System.out.println(putFileResult);
     }
 }
