@@ -1,4 +1,4 @@
-package com.mydata.sdktest.codecommit;
+package com.mydata.awssdktest.codecommit;
 
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.codecommit.AWSCodeCommit;
