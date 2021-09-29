@@ -15,13 +15,13 @@ import java.util.List;
 public class SnsTest {
 
     private static AmazonSNSClient snsClient;
-    @Value("${sns.topic-arn}")
+    @Value("${test.sns.topic-arn}")
     private String topicArn;
-    @Value("${sns.protocol}")
+    @Value("${test.sns.protocol}")
     private String protocol;
-    @Value("${sns.endpoint}")
+    @Value("${test.sns.endpoint}")
     private String endpoint;
-    @Value("${sns.subscription-arn}")
+    @Value("${test.sns.subscription-arn}")
     private String subscriptionArn;
 
     @BeforeAll

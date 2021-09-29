@@ -5,8 +5,8 @@ test:
     commit:
       branch-name: <BRANCH_NAME>
       commit-message: <COMMIT_MESSAGE>
-sns:
-  topic-arn: <TOPIC_ARN>
-  protocol: <PROTOCOL> # email, https, lambda, etc.
-  endpoint: <ENDPOINT>
-  subscription-arn: <SUBSCRIPTION_ARN>
+  sns:
+    topic-arn: <TOPIC_ARN>
+    protocol: <PROTOCOL> # email, https, lambda, etc.
+    endpoint: <ENDPOINT>
+    subscription-arn: <SUBSCRIPTION_ARN>
