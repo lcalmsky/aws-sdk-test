@@ -25,6 +25,7 @@ dependencies {
     // aws
     implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.1000')
     implementation ('com.amazonaws:aws-java-sdk-codecommit')
+    implementation ('com.amazonaws:aws-java-sdk-sns')
 
     // lombok
     compileOnly ('org.projectlombok:lombok')

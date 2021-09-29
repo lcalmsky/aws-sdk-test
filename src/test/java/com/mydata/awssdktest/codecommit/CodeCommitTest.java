@@ -36,7 +36,7 @@ public class CodeCommitTest {
     private static String commitId;
 
     @BeforeAll
-    static void beforeEach() {
+    static void beforeAll() {
         // given
         codeCommit = AWSCodeCommitClient.builder()
                 .withRegion(Regions.AP_NORTHEAST_2.getName())
