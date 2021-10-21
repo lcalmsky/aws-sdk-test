@@ -10,3 +10,5 @@ test:
     protocol: <PROTOCOL> # email, https, lambda, etc.
     endpoint: <ENDPOINT>
     subscription-arn: <SUBSCRIPTION_ARN>
+  sqs:
+    queue-url: <QUEUE_URL>
